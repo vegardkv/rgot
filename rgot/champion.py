@@ -100,12 +100,12 @@ class Champion:
         Champion Stats
         """
         attack_damage = (self.basestats["attackdamage"] +
-                         self.basestats["attackdamageperlevel"]*self.level +
+                         self.basestats["attackdamageperlevel"]*(self.level - 1) +
                          self.bonus_stats["FlatPhysicalDamageMod"] +
-                         self.bonus_stats["rFlatPhysicalDamageModPerLevel"]*self.level)
+                         self.bonus_stats["rFlatPhysicalDamageModPerLevel"]*(self.level - 1))
 
         crit_chance = min(self.basestats["crit"] +
-                          self.basestats["critperlevel"]*self.level +
+                          self.basestats["critperlevel"]*(self.level - 1) +
                           self.bonus_stats["FlatCritChanceMod"], 1.0)
 
         crit_damage = self.bonus_stats["FlatCritDamageMod"]
@@ -114,7 +114,7 @@ class Champion:
         # From lol wiki: [Crit] Damage multiplier = 1 + (Critical chance × (1 + Bonus critical damage))
         crit_damage_multiplier = 1.0 + crit_chance * (1.0 + crit_damage)
 
-        attack_speed_percent = (self.basestats["attackspeedperlevel"] / 100.0 * self.level +
+        attack_speed_percent = (self.basestats["attackspeedperlevel"] / 100.0 * (self.level - 1) +
                                 self.bonus_stats["PercentAttackSpeedMod"])
 
         attack_speed = self.base_attack_speed * (1.0 + attack_speed_percent)
@@ -137,7 +137,7 @@ class Champion:
             target_armor = 0.0
 
         # TODO: Percent armor reduction (Black cleaver)
-        target_armor_actual = target_armor * armor_penetration_percent - armor_penetration_flat
+        target_armor_actual = target_armor * (1.0 - armor_penetration_percent) - armor_penetration_flat
 
         # TODO: Armor under 0.0 (Flat armor reduction, e.x. Rammus taunt)
         if target_armor_actual < 0.0:

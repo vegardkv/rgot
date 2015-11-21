@@ -21,15 +21,23 @@ def brute_force_for_itemsets(friendlychampion, enemychampion, itembase, analysis
         filters = {}
     minNumberOfItems = 0 if 'minNumberOfItems' not in filters else filters['minNumberOfItems']
     maxNumberOfItems = MAX_ITEMS if 'maxNumberOfItems' not in filters else filters['maxNumberOfItems']
-    minGoldCost = 0 if 'minGoldCost' not in filters else filters['minGoldCost']
+    minGoldCost = -1 if 'minGoldCost' not in filters else filters['minGoldCost']
     maxGoldCost = float('inf') if 'maxGoldCost' not in filters else filters['maxGoldCost']
     output = OptimizerOutput()
+    counter = 0
     for n_itms in range(minNumberOfItems, maxNumberOfItems+1):
+        print('Computing combinations of %i items' % n_itms)
         for item_tuple in combinations_with_replacement(itembase, n_itms):
+            friendlychampion.items = list(item_tuple)
             if minGoldCost < sum([int(i['gold']['total']) for i in item_tuple]) < maxGoldCost:
                 if analysis == 'autoAttackDPS':
                     output.results.append(friendlychampion.calculate_autoattack_dps(target=enemychampion))
                     output.itemsets.append(item_tuple)
+            if not counter % 100:
+                print(counter)
+            counter += 1
+            if len(item_tuple)==1:
+                print(item_tuple[0]['name'])
     return output
 
 
@@ -39,18 +47,19 @@ class OptimizerOutput:
         self.results = []
 
     def sort_permanently(self, ascending=True):
-        self.itemsets = sorted(self.itemsets, key=self.results.__getitem__(), reverse=ascending)
-        self.results = sorted(self.results, reverse=ascending)
+        new_order = sorted(range(len(self.results)), key=self.results.__getitem__)
+        self.itemsets = [self.itemsets[i] for i in new_order]
+        self.results = [self.results[i] for i in new_order]
 
     def write_to_json_file(self, filename):
         json.dump(self.as_dict(), open(filename, 'w'))
 
     def write_to_csv_file(self, filename):
-        with open(filename, 'r') as outf:
-            writer = csv.DictWriter(outf, ['items', 'value'])
+        with open(filename, 'w') as outf:
+            writer = csv.DictWriter(outf, ['items', 'value'], lineterminator='\n')
             writer.writeheader()
             for i in range(len(self.itemsets)):
-                writer.writerow({'items': self.itemsets[i]['name'], 'value': self.results[i]})
+                writer.writerow({'items': ','.join([ii['name'] for ii in self.itemsets[i]]), 'value': sum(self.results[i])})
 
     def as_dict(self):
         return {'itemsets': self.itemsets, 'results': self.results}
