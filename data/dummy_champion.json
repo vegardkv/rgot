@@ -1,0 +1,28 @@
+{
+      "id": 1337,
+      "key": "George",
+      "name": "Clooney",
+      "title": "Chorize",
+      "stats": {
+        "armor": 50.0,
+        "armorperlevel": 1.0,
+        "attackdamage": 50.0,
+        "attackdamageperlevel": 5.0,
+        "attackrange": 500.0,
+        "attackspeedoffset": 0.0,
+        "attackspeedperlevel": 0.0,
+        "crit": 0.0,
+        "critperlevel": 0.0,
+        "hp": 500.0,
+        "hpperlevel": 50.0,
+        "hpregen": 5.0,
+        "hpregenperlevel": 0.5,
+        "movespeed": 350.0,
+        "mp": 300.0,
+        "mpperlevel": 50.0,
+        "mpregen": 5.0,
+        "mpregenperlevel": 1.0,
+        "spellblock": 50.0,
+        "spellblockperlevel": 0.0
+      }
+}
