@@ -19,5 +19,5 @@ class TestOptimizer(unittest.TestCase):
         champion = rgot.champion.Champion(self.dummy_champion_info)
         target_champion = rgot.champion.Champion(self.dummy_champion_info)
         result = rgot.optimizer.brute_force_for_itemsets(champion, target_champion, items)
-        result.sort(ascending=False)
+        result.sort_permanently(ascending=False)
         result.write_to_json('./out/test.json')
