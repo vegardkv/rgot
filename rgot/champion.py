@@ -37,10 +37,10 @@ class Champion:
         self._e_damage = champion_data['spells'][2]['effect'][1]
         self._r_damage = champion_data['spells'][3]['effect'][1]
 
-        self._q_scaling = champion_data['spells'][0].get('vars', {[]})
-        self._w_scaling = champion_data['spells'][1].get('vars', {[]})
-        self._e_scaling = champion_data['spells'][2].get('vars', {[]})
-        self._r_scaling = champion_data['spells'][3].get('vars', {[]})
+        self._q_scaling = champion_data['spells'][0].get('vars', [{}])
+        self._w_scaling = champion_data['spells'][1].get('vars', [{}])
+        self._e_scaling = champion_data['spells'][2].get('vars', [{}])
+        self._r_scaling = champion_data['spells'][3].get('vars', [{}])
 
         # Private variables
         self.__bonus_stats = []
