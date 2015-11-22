@@ -1,2 +1,2 @@
 # rgot
-Super secret Dota Legends of Newearth project.
+Super secret Dota Legends of Newerth of The Storm project.
