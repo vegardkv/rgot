@@ -8,12 +8,14 @@ class ItemSet:
 DamageSet = namedtuple('DamageSet', ['physical', 'magic', 'pure'])
 ATTACK_SPEED_NUMERATOR = 0.625  # http://leagueoflegends.wikia.com/wiki/Attack_speed
 
+
 class RuneSet:
     def __init__(self):
         self.stats = {}
 
     def stats(self):
         pass
+
 
 class Champion:
     def __init__(self, champion_data):
@@ -80,6 +82,7 @@ class Champion:
             # unique_items = []
 
             # Matches item stat properties from "../data/all_items.json"
+            # TODO: Ikke fyll inn alle keys, la bonus_stats returnere 0.0 dersom taggen ikke fins
             temp_bonus_stats = {
                 # AD STATS
                 # Attack Damage
@@ -188,43 +191,53 @@ class Champion:
                         temp_bonus_stats[key] = max(value, temp_bonus_stats[key])
                     else:
                         temp_bonus_stats[key] += value
-            """
-            for item in self.__items:
-                stats = item["stats"]
-                # Physical Damage
-                if "rFlatPhysicalDamageModPerLevel" in stats:
-                    temp_bonus_stats["rFlatPhysicalDamageModPerLevel"] += stats["rFlatPhysicalDamageModPerLevel"]
-                if "FlatPhysicalDamageMod" in stats:
-                    temp_bonus_stats["FlatPhysicalDamageMod"] += stats["FlatPhysicalDamageMod"]
-
-                # Attack Speed
-                if "PercentAttackSpeedMod" in stats:
-                    temp_bonus_stats["PercentAttackSpeedMod"] += stats["PercentAttackSpeedMod"]
-
-                # Critical Chance/Damage
-                if "FlatCritChanceMod" in stats:
-                    temp_bonus_stats["FlatCritChanceMod"] += stats["FlatCritChanceMod"]
-                # Crit damage from items only given from Infinity Edge, which is an UNIQUE stat.
-                if "FlatCritDamageMod" in stats:
-                    temp_bonus_stats["FlatCritDamageMod"] = max(stats["FlatCritDamageMod"],
-                                                                temp_bonus_stats["FlatCritDamageMod"])
-                # Armor Penetration
-                if "rFlatArmorPenetrationMod" in stats:
-                    temp_bonus_stats["rFlatArmorPenetrationMod"] += stats["rFlatArmorPenetrationMod"]
-                # Percent armor penetration only occurs in unique effect "Last Whisper"
-                if "rPercentArmorPenetrationMod" in stats:
-                    temp_bonus_stats["rPercentArmorPenetrationMod"] = max(
-                        stats["rPercentArmorPenetrationMod"],
-                        temp_bonus_stats["rPercentArmorPenetrationMod"])
-
-                # Armor
-                if "FlatArmorMod" in stats:
-                    temp_bonus_stats["FlatArmorMod"] += stats["FlatArmorMod"]
-                """
-
             self.__bonus_stats = temp_bonus_stats
 
         return self.__bonus_stats
+
+    # Common calculations has the "derived"-tag
+    # AD STATS
+    @property
+    def derived_bonus_attack_damage(self):
+        return (self.bonus_stats["rFlatPhysicalDamageModPerLevel"] *
+                (self.level - 1) + self.bonus_stats["FlatPhysicalDamageMod"])
+
+    @property
+    def derived_base_attack_damage(self):
+        return self.basestats["attackdamage"] + self.basestats["attackdamageperlevel"] * (self.level - 1)
+
+    @property
+    def derived_total_attack_speed(self):
+        total_attack_speed = (self.base_attack_speed * (1.0 +
+                              self.basestats["attackspeedperlevel"] / 100.0 * (self.level - 1) +
+                              self.bonus_stats["PercentAttackSpeedMod"] +
+                              self.bonus_stats["rPercentAttackSpeedModPerLevel"] * (self.level - 1)))
+        return total_attack_speed if total_attack_speed <= 2.5 else 2.5
+
+    @property
+    def derived_total_crit_chance(self):
+        total_crit_chance = ((self.bonus_stats["FlatCritChanceMod"] +
+                              self.bonus_stats["rFlatCritChanceModPerLevel"] * (self.level - 1) +
+                              self.basestats["crit"] +
+                              self.basestats["critperlevel"] * (self.level - 1)) *
+                             (1.0 + self.bonus_stats["PercentCritChanceMod"]))
+        return total_crit_chance if total_crit_chance <= 1.0 else 1.0
+
+    # TODO: "PercentCritDamageMod" would this apply to total crit damage or only bonus
+    # Given as a number 1.0 + bonus_crit_damage
+    @property
+    def derived_total_crit_damage(self):
+        return (1.0 + self.bonus_stats["rFlatCritDamageModPerLevel"] * (self.level - 1) +
+                self.bonus_stats["FlatCritDamageMod"])
+
+    # ARMOR
+    @property
+    def derived_base_armor(self):
+        return self.basestats["armor"] + self.basestats["armorperlevel"] * (self.level - 1)
+
+    @property
+    def derived_bonus_armor(self):
+        return self.bonus_stats["FlatArmorMod"] + self.bonus_stats["rFlatArmorModPerLevel"] * (self.level - 1)
 
     @property
     def items(self):
@@ -237,63 +250,31 @@ class Champion:
 
     def calculate_autoattack_dps(self, target=None):
         """
-        useful information lmao
+        Calculates Champion auto attack damage per second.
+        :param target: Champion-instance of target
+        :return DamageSet-instance
         """
         # TODO: Calculate with target items (randuins omen ect.)
-
-        """
-        Champion Stats
-        """
-        attack_damage = (self.basestats["attackdamage"] +
-                         self.basestats["attackdamageperlevel"]*(self.level - 1) +
-                         self.bonus_stats["FlatPhysicalDamageMod"] +
-                         self.bonus_stats["rFlatPhysicalDamageModPerLevel"]*(self.level - 1))
-
-        crit_chance = min(self.basestats["crit"] +
-                          self.basestats["critperlevel"]*(self.level - 1) +
-                          self.bonus_stats["FlatCritChanceMod"], 1.0)
-
-        crit_damage = self.bonus_stats["FlatCritDamageMod"]
-
-        # TODO: (1.0 + crit_damage) becomes (self.crit_damage_base + crit_damage)
-        # From lol wiki: [Crit] Damage multiplier = 1 + (Critical chance × (1 + Bonus critical damage))
-        crit_damage_multiplier = 1.0 + crit_chance * (1.0 + crit_damage)
-
-        attack_speed_percent = (self.basestats["attackspeedperlevel"] / 100.0 * (self.level - 1) +
-                                self.bonus_stats["PercentAttackSpeedMod"])
-
-        attack_speed = self.base_attack_speed * (1.0 + attack_speed_percent)
-
-        # TODO: Let this be controlled by some settings file/global variable
-        if attack_speed > 2.5:
-            attack_speed = 2.5
-
-        armor_penetration_percent = self.bonus_stats["rPercentArmorPenetrationMod"]
-        armor_penetration_flat = self.bonus_stats["rFlatArmorPenetrationMod"]
-
-        """
-        Target Stats
-        """
-        if target is not None:
-            target_armor = (target.basestats["armor"] +
-                            target.basestats["armorperlevel"]*target.level +
-                            target.bonus_stats["FlatArmorMod"])
-        else:
-            target_armor = 0.0
-
         # TODO: Percent armor reduction (Black cleaver)
-        target_armor_actual = target_armor * (1.0 - armor_penetration_percent) - armor_penetration_flat
-
         # TODO: Armor under 0.0 (Flat armor reduction, e.x. Rammus taunt)
-        if target_armor_actual < 0.0:
-            target_armor_actual = 0.0
 
-        armor_multiplier = 100.0 / (target_armor_actual + 100.0)
+        attack_damage = self.derived_base_attack_damage + self.derived_bonus_attack_damage
 
-        """
-        Physical dps calculation
-        """
-        physical_dps = attack_damage * attack_speed * crit_damage_multiplier * armor_multiplier
+        # From lol wiki: [Crit] Damage multiplier = 1 + (Critical chance × (1 + Bonus critical damage))
+        crit_damage_multiplier = 1.0 + self.derived_total_crit_chance * self.derived_total_crit_damage
+
+        if target is not None:
+            target_armor_perceived = (target.derived_base_armor +
+                                      (target.derived_bonus_armor *
+                                       (1.0 - self.bonus_stats["rPercentArmorPenetrationMod"])) -
+                                      self.bonus_stats["rFlatArmorPenetrationMod"])
+            target_armor_perceived = target_armor_perceived if target_armor_perceived >= 0.0 else 0.0
+
+        else:
+            target_armor_perceived = 0.0
+        armor_multiplier = 100.0 / (target_armor_perceived + 100.0)
+
+        physical_dps = attack_damage * self.derived_total_attack_speed * crit_damage_multiplier * armor_multiplier
 
         return DamageSet(physical=physical_dps, magic=0.0, pure=0.0)
 
