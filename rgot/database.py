@@ -1,5 +1,6 @@
 import json
 import rgot.champion
+from rgot.implementations.lucian import Lucian
 
 __author__ = 'Vegard'
 
@@ -33,4 +34,7 @@ class ChampionGenerator:
         return self.all_champions[name]
 
     def create_champion(self, name):
-        return rgot.champion.Champion(self.all_data_for_champion(name))
+        if name=='Lucian':
+            return Lucian(self.all_champions[name])
+        else:
+            return rgot.champion.Champion(self.all_champions[name])

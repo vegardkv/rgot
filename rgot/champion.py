@@ -24,12 +24,55 @@ class Champion:
         self.masteries = []
         self.runes = RuneSet()
         self.level = 1
+        self.name = champion_data['name']
         # TODO: Item effects (e.x. randuins omen passive)
         self.item_effects = []
+
+        # Protected variables
+
+        # These values are read from champion_data directly, but should only be utilized by implementations of Champion.
+        # The values are not necessarily correct for all champions, and each case must be inspected carefully. If the
+        # values does not make sense, then they should be overwritten by the constructor of the implementation.
+        self._q_damage = champion_data['spells'][0]['effect'][1]
+        self._w_damage = champion_data['spells'][1]['effect'][1]
+        self._e_damage = champion_data['spells'][2]['effect'][1]
+        self._r_damage = champion_data['spells'][3]['effect'][1]
+
+        self._q_scaling = champion_data['spells'][0].get('vars', {[]})
+        self._w_scaling = champion_data['spells'][1].get('vars', {[]})
+        self._e_scaling = champion_data['spells'][2].get('vars', {[]})
+        self._r_scaling = champion_data['spells'][3].get('vars', {[]})
 
         # Private variables
         self.__bonus_stats = []
         self.__items = []
+
+    # For implementations of Champion, override these. Another option is to implement an AbstractChampion class that
+    # provide the interface to the Champion-class (for readability).
+    def direct_damage_q(self, skill_level=1):
+        return DamageSet(physical=0, magic=0, pure=0)
+
+    def direct_damage_w(self, skill_level=1):
+        return DamageSet(physical=0, magic=0, pure=0)
+
+    def direct_damage_e(self, skill_level=1):
+        return DamageSet(physical=0, magic=0, pure=0)
+
+    def direct_damage_r(self, skill_level=1):
+        return DamageSet(physical=0, magic=0, pure=0)
+
+    # Damage over time returns the duration (default 0.0) and damage over time for a given ability. Override these.
+    def damage_over_time_q(self, skill_level=1):
+        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+
+    def damage_over_time_w(self, skill_level=1):
+        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+
+    def damage_over_time_e(self, skill_level=1):
+        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+
+    def damage_over_time_r(self, skill_level=1):
+        return 0.0, DamageSet(physical=0, magic=0, pure=0)
 
     @property
     def bonus_stats(self):
