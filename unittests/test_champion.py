@@ -1,9 +1,9 @@
 import json
 import rgot.champion as dc
+import unittest
 
 __author__ = 'Vegard'
 
-import unittest
 
 class TestChampion(unittest.TestCase):
     def tearDown(self):

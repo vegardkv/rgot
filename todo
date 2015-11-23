@@ -7,3 +7,48 @@ Champion abilities:
     - Deretter mer avanserte ting som cooldown og ability-synergi
 
 Optimale build paths
+
+
+
+#####################################
+#          NOTES
+#####################################
+
+---- Stutterstep / orb walking / ability weaving ----
+
+(start attack).................................(finish attack)...............(start new attack)...|
+|-------------------------attack animation-------------------||-time-2-move-|
+|-------------------------------attack speed--------------------------------|
+
++ Det er forskjell på når i autoattack-animasjonen man kan flytte på seg uten å avbryte angrepet.
+  Er det mulig å lese dette fra stats?(det er champion spesific)
+
++ Nyttig for mer avanserte simuleringer
+
++ Nyttig for å vite når man kan bruke abilities etter å ha fått av et autoattack.
+
++ Bør bygge modell for å støtte ping / slack i timing pga human error
+
++ Auto attack resets: http://leagueoflegends.wikia.com/wiki/Basic_attack#Resets
+
+
+---- Item model ----
+NU: Not unique
+U: unique
+
+Item properties:
++ Gold cost
++ Plain stats (NU) < Can mostly be read from /data/all_item_parsed.json
+
++ Passive plain stats (U/NU) <
++ Passive effect (U)
+
++ Active stats (temporary) (U)
++ Active effect (U)
+
+Model options:
++ Item database
+
++ Current model (dictionary of stats + some arbritary item handling for each unique case)
+
+
