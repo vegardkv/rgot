@@ -278,6 +278,21 @@ class Champion:
 
         return DamageSet(physical=physical_dps, magic=0.0, pure=0.0)
 
+    def damage_set(self, damageset, target):
+        physical_damage, magic_damage, pure_damage = 0,0,0
+        if damageset['physical'] > 0:
+            target_armor_perceived = (target.derived_base_armor +
+                                      (target.derived_bonus_armor *
+                                       (1.0 - self.bonus_stats["rPercentArmorPenetrationMod"])) -
+                                      self.bonus_stats["rFlatArmorPenetrationMod"])
+            target_armor_perceived = target_armor_perceived if target_armor_perceived >= 0.0 else 0.0
+            armor_multiplier = 100.0 / (target_armor_perceived + 100.0)
+            physical_damage = damageset['physical'] * armor_multiplier
+        if damageset['magic'] > 0:
+            magic_damage = damageset['magic']
+        if damageset['pure'] > 0:
+            pure_damage = damageset['pure']
+        return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
 
 """
 class Lucian(Champion):
