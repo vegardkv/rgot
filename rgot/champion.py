@@ -278,8 +278,27 @@ class Champion:
 
         return DamageSet(physical=physical_dps, magic=0.0, pure=0.0)
 
-    def damage_set(self, damageset, target):
-        physical_damage, magic_damage, pure_damage = 0,0,0
+    # Utility functions
+    def _calculate_scaled_damage(self, ability):
+        if ability=='q':
+            scaling = self._q_scaling
+        elif ability=='w':
+            scaling = self._w_scaling
+        elif ability=='e':
+            scaling = self._e_scaling
+        elif ability=='r':
+            scaling = self._r_scaling
+        else:
+            raise Exception('Scaling not defined for ability: %s.' % ability)
+        ph, ma, pu = 0, 0, 0
+        for k, v in scaling.items():
+            if k=='spelldamage':
+                ma += 0.9
+
+
+
+    def _calculate_resisted_damage(self, damageset, target):
+        physical_damage, magic_damage, pure_damage = 0, 0, 0
         if damageset['physical'] > 0:
             target_armor_perceived = (target.derived_base_armor +
                                       (target.derived_bonus_armor *

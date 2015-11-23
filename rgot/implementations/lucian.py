@@ -2,10 +2,10 @@ from rgot.champion import Champion, DamageSet
 
 __author__ = 'Vegard'
 
+
 class Lucian(Champion):
     def __init__(self, champion_data):
         super().__init__(champion_data)
-        # TODO: do this in the Champion class? Is the data always structured as follows?
         number_of_shots = champion_data['spells'][3]['effect'][5]
         damage_per_shot = champion_data['spells'][3]['effect'][2]
 
@@ -16,8 +16,8 @@ class Lucian(Champion):
     def direct_damage_e(self, skill_level=1):
         return super().direct_damage_e()
 
-    def direct_damage_w(self, skill_level=1):
-
+    def direct_damage_w(self, skill_level=1): #todo: this can perhaps be moved to the parent class?
+        tmp_damage = self._w_damage[skill_level] + self._w_scaling['coeff'] * self.bonus_stats.get()
         return super().direct_damage_w()
 
     def direct_damage_r(self, skill_level=1):
