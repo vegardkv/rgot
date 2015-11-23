@@ -239,6 +239,11 @@ class Champion:
     def derived_bonus_armor(self):
         return self.bonus_stats["FlatArmorMod"] + self.bonus_stats["rFlatArmorModPerLevel"] * (self.level - 1)
 
+    # ABILITIES
+    @property
+    def derived_ability_power(self):
+        return 0
+
     @property
     def items(self):
         return self.__items
@@ -278,24 +283,44 @@ class Champion:
 
         return DamageSet(physical=physical_dps, magic=0.0, pure=0.0)
 
+    def calculate_scaled_damage_q(self, skill_level=1):
+        return self._calculate_scaled_damage('q', skill_level=skill_level)
+
+    def calculate_scaled_damage_w(self, skill_level=1):
+        return self._calculate_scaled_damage('w', skill_level=skill_level)
+
+    def calculate_scaled_damage_e(self, skill_level=1):
+        return self._calculate_scaled_damage('e', skill_level=skill_level)
+
+    def calculate_scaled_damage_r(self, skill_level=1):
+        return self._calculate_scaled_damage('r', skill_level=skill_level)
+
     # Utility functions
-    def _calculate_scaled_damage(self, ability):
-        if ability=='q':
+    def _calculate_scaled_damage(self, ability, skill_level=0):
+        """
+        This is a seperate function from calculate_scaled_damage_X in order to be able to override specific
+        calculate_scaled_damage-function.
+        :param ability: q,w,e,r
+        :return:
+        """
+        if ability == 'q':
             scaling = self._q_scaling
-        elif ability=='w':
+        elif ability == 'w':
             scaling = self._w_scaling
-        elif ability=='e':
+        elif ability == 'e':
             scaling = self._e_scaling
-        elif ability=='r':
+        elif ability == 'r':
             scaling = self._r_scaling
         else:
             raise Exception('Scaling not defined for ability: %s.' % ability)
         ph, ma, pu = 0, 0, 0
-        for k, v in scaling.items():
-            if k=='spelldamage':
-                ma += 0.9
-
-
+        for entry in scaling:
+            if entry.get('link', None) == 'spelldamage':
+                ma += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level] * self.derived_ability_power
+            elif  entry.get('link', None) == 'attackdamage':
+                ph += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level] * \
+                      (self.derived_bonus_attack_damage + self.derived_base_attack_damage)
+        return DamageSet(physical=ph, magic=ma, pure=pu)
 
     def _calculate_resisted_damage(self, damageset, target):
         physical_damage, magic_damage, pure_damage = 0, 0, 0
