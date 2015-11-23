@@ -14,6 +14,15 @@ Optimale build paths
 #          NOTES
 #####################################
 
+--- Auto attack ---
+
++ Egen klasse?
+
++ Modifiers:
+    - Skills
+
+
+
 ---- Stutterstep / orb walking / ability weaving ----
 
 (start attack).................................(finish attack)...............(start new attack)...|
@@ -36,19 +45,20 @@ Optimale build paths
 NU: Not unique
 U: unique
 
-Item properties:
-+ Gold cost
-+ Plain stats (NU) < Can mostly be read from /data/all_item_parsed.json
+  Item properties:
+    + Gold cost
+    + Plain stats (NU) < Can mostly be read from /data/all_item_parsed.json
 
-+ Passive plain stats (U/NU) <
-+ Passive effect (U)
+    + Passive plain stats (U/NU) <
+    + Passive effect (U)
 
-+ Active stats (temporary) (U)
-+ Active effect (U)
+    + Active stats (temporary) (U)
+    + Active effect (U)
 
-Model options:
-+ Item database
+  Model options:
+    + Item database
 
-+ Current model (dictionary of stats + some arbritary item handling for each unique case)
+    + Current model (dictionary of stats + some arbritary item handling for each unique case)
+
 
 
