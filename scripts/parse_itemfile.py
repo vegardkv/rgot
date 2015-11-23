@@ -39,11 +39,11 @@ for item in all_items['data'].values():
     elif item['name'] == 'Mortal Reminder':
         item['stats']['rPercentBonusArmorPenetrationMod'] = float(item['effect']['Effect2Amount'])
     elif item['name'] == 'Serrated Dirk':
-        item['stats']['rFlatArmorPenetrationMod'] = float(item['effect']['Effect2Amount'])
+        item['stats']['rPercentArmorPenetrationMod'] = float(item['effect']['Effect2Amount'])
     elif item['name'] == 'Lord Dominik\'s Regards':
         item['stats']['rPercentBonusArmorPenetrationMod'] = float(item['effect']['Effect1Amount'])
     elif item['name'] == 'The Black Cleaver (full stacks)':
-        item['stats']['rPercentArmorPenetrationMod'] = float(item['effect']['Effect5Amount'])
+        item['stats']['rPercentArmorReductionMod'] = float(item['effect']['Effect5Amount'])
     elif item['name'] == 'Maw of Malmortius':
         item['stats']['rFlatArmorPenetrationMod'] = 10
 
