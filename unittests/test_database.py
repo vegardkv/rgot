@@ -16,10 +16,20 @@ class TestChampionGenerator(unittest.TestCase):
         lucian = self.champion_generator.create_champion('Lucian')
         self.assertEqual(lucian.name, 'Lucian')
 
-    def test_lucian_spell_scaling(self):
-        lucian = self.champion_generator.create_champion('Lucian')
-        q = lucian.calculate_scaled_damage_q()
-        w = lucian.calculate_scaled_damage_w()
-        e = lucian.calculate_scaled_damage_e()
-        r = lucian.calculate_scaled_damage_r()
-        self.assertEqual(lucian.name, 'Lucian')
+class TestItemGeneretor(unittest.TestCase):
+    def tearDown(self):
+        pass
+
+    def setUp(self):
+        super().setUp()
+        self.item_generator = rgot.database.ItemBaseGenerator('../data/all_items_parsed.json')
+
+    def test_get_by_name(self):
+        ie = self.item_generator.get(name='Infinity Edge')
+        self.assertEqual(ie['id'], 3031)
+
+    def test_get_by_index(self):
+        ie1 = self.item_generator.get(index=3031)
+        ie2 = self.item_generator.get(index='3031')
+        self.assertEqual(ie1['name'], 'Infinity Edge')
+        self.assertEqual(ie2['name'], 'Infinity Edge')

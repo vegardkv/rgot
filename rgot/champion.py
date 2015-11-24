@@ -316,9 +316,9 @@ class Champion:
         ph, ma, pu = 0, 0, 0
         for entry in scaling:
             if entry.get('link', None) == 'spelldamage':
-                ma += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level] * self.derived_ability_power
+                ma += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level - 1] * self.derived_ability_power
             elif  entry.get('link', None) == 'attackdamage':
-                ph += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level] * \
+                ph += entry['coeff'][0 if len(entry['coeff']) == 1 else skill_level - 1] * \
                       (self.derived_bonus_attack_damage + self.derived_base_attack_damage)
         return DamageSet(physical=ph, magic=ma, pure=pu)
 
@@ -337,13 +337,3 @@ class Champion:
         if damageset['pure'] > 0:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
-
-"""
-class Lucian(Champion):
-    def __init__(self):
-        stats = dict(attackDamage=50, attackSpeed=0.625)
-        super().__init__(stats)
-
-    def calculate_autoattack_dps(self):
-        pass
-"""

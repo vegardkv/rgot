@@ -23,6 +23,22 @@ class ItemBaseGenerator:
                 filtered_items.append(item)
         return filtered_items
 
+    # Could use __getitem__ instead, depending on the implementation of the Item-class
+    def get(self, name=None, index=None):
+        """
+        Returns an item by name or index. At least one of the inputs is required
+        :param name: item name
+        :param index: league defined id
+        :return:
+        """
+        it = None
+        if name is not None:
+            it = [i for i in self.all_items.values() if i['name'] == name][0]
+        elif index is not None:
+            it = self.all_items[str(index)]
+        return it
+
+
 class ChampionGenerator:
     def __init__(self, filename):
         self.all_champions = json.load(open(filename,'r'))['data']
