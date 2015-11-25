@@ -1,11 +1,23 @@
 from collections import namedtuple
+from enum import Enum
 
 __author__ = 'Vegard'
+
 
 class ItemSet:
     pass
 
 DamageSet = namedtuple('DamageSet', ['physical', 'magic', 'pure'])
+DamageSet.__new__.__defaults__ = (0, 0, 0)  # In order for values to default to 0. E.g. DamageSet(magic=5).
+
+def add_damage_sets(ds1, ds2):
+    """
+    :param ds2: DamageSet
+    :param ds1: DamageSet
+    :rtype: DamageSet
+    """
+    return DamageSet(physical=ds1.physical + ds2.physical, magic=ds1.magic + ds2.magic, pure=ds1.pure + ds2.pure)
+
 ATTACK_SPEED_NUMERATOR = 0.625  # http://leagueoflegends.wikia.com/wiki/Attack_speed
 
 
@@ -44,36 +56,98 @@ class Champion:
         self._e_scaling = champion_data['spells'][2].get('vars', [{}])
         self._r_scaling = champion_data['spells'][3].get('vars', [{}])
 
+        self._q_damage_category = None
+        self._w_damage_category = None
+        self._e_damage_category = None
+        self._r_damage_category = None
+
         # Private variables
         self.__bonus_stats = []
         self.__items = []
 
     # For implementations of Champion, override these. Another option is to implement an AbstractChampion class that
     # provide the interface to the Champion-class (for readability).
-    def direct_damage_q(self, skill_level=1):
-        return DamageSet(physical=0, magic=0, pure=0)
+    def direct_damage_q(self, skill_level=1, target=None):
+        if self._q_damage_category == 'physical':
+            dmg = add_damage_sets(DamageSet(physical=self._q_damage[skill_level]),
+                                  self._calculate_scaled_damage('q', skill_level))
+        elif self._q_damage_category == 'magic':
+            dmg = add_damage_sets(DamageSet(magic=self._q_damage[skill_level]),
+                                  self._calculate_scaled_damage('q', skill_level))
+        elif self._q_damage_category == 'pure':
+            dmg = add_damage_sets(DamageSet(pure=self._q_damage[skill_level]),
+                                  self._calculate_scaled_damage('q', skill_level))
+        else:
+            raise AttributeError('Damage Category not defined for Q for champion %s' % self.name)
+        if target is None:
+            return dmg
+        else:
+            return self._calculate_resisted_damage(dmg, target)
 
-    def direct_damage_w(self, skill_level=1):
-        return DamageSet(physical=0, magic=0, pure=0)
+    def direct_damage_w(self, skill_level=1, target=None):
+        if self._w_damage_category == 'physical':
+            dmg = add_damage_sets(DamageSet(physical=self._w_damage[skill_level]),
+                                  self._calculate_scaled_damage('w', skill_level))
+        elif self._w_damage_category == 'magic':
+            dmg = add_damage_sets(DamageSet(magic=self._w_damage[skill_level]),
+                                  self._calculate_scaled_damage('w', skill_level))
+        elif self._w_damage_category == 'pure':
+            dmg = add_damage_sets(DamageSet(pure=self._w_damage[skill_level]),
+                                  self._calculate_scaled_damage('w', skill_level))
+        else:
+            raise AttributeError('Damage Category not defined for W for champion %s' % self.name)
+        if target is None:
+            return dmg
+        else:
+            return self._calculate_resisted_damage(dmg, target)
 
-    def direct_damage_e(self, skill_level=1):
-        return DamageSet(physical=0, magic=0, pure=0)
 
-    def direct_damage_r(self, skill_level=1):
-        return DamageSet(physical=0, magic=0, pure=0)
+    def direct_damage_e(self, skill_level=1, target=None):
+        if self._w_damage_category == 'physical':
+            dmg = add_damage_sets(DamageSet(physical=self._e_damage[skill_level]),
+                                  self._calculate_scaled_damage('e', skill_level))
+        elif self._w_damage_category == 'magic':
+            dmg = add_damage_sets(DamageSet(magic=self._e_damage[skill_level]),
+                                  self._calculate_scaled_damage('e', skill_level))
+        elif self._w_damage_category == 'pure':
+            dmg = add_damage_sets(DamageSet(pure=self._e_damage[skill_level]),
+                                  self._calculate_scaled_damage('e', skill_level))
+        else:
+            raise AttributeError('Damage Category not defined for E for champion %s' % self.name)
+        if target is None:
+            return dmg
+        else:
+            return self._calculate_resisted_damage(dmg, target)
+
+    def direct_damage_r(self, skill_level=1, target=None):
+        if self._r_damage_category == 'physical':
+            dmg = add_damage_sets(DamageSet(physical=self._r_damage[skill_level]),
+                                  self._calculate_scaled_damage('r', skill_level))
+        elif self._r_damage_category == 'magic':
+            dmg = add_damage_sets(DamageSet(magic=self._r_damage[skill_level]),
+                                  self._calculate_scaled_damage('r', skill_level))
+        elif self._r_damage_category == 'pure':
+            dmg = add_damage_sets(DamageSet(pure=self._r_damage[skill_level]),
+                                  self._calculate_scaled_damage('r', skill_level))
+        else:
+            raise AttributeError('Damage Category not defined for R for champion %s' % self.name)
+        if target is None:
+            return dmg
+        else:
+            return self._calculate_resisted_damage(dmg, target)
 
     # Damage over time returns the duration (default 0.0) and damage over time for a given ability. Override these.
-    def damage_over_time_q(self, skill_level=1):
-        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+    def damage_over_time_q(self, skill_level=1, target=None):
+        return 0.0, DamageSet()
 
-    def damage_over_time_w(self, skill_level=1):
-        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+    def damage_over_time_w(self, skill_level=1, target=None):
+        return 0.0, DamageSet()
 
-    def damage_over_time_e(self, skill_level=1):
-        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+    def damage_over_time_e(self, skill_level=1, target=None):
+        return 0.0, DamageSet()
 
-    def damage_over_time_r(self, skill_level=1):
-        return 0.0, DamageSet(physical=0, magic=0, pure=0)
+    def damage_over_time_r(self, skill_level=1, target=None):
+        return 0.0, DamageSet()
 
     @property
     def bonus_stats(self):
