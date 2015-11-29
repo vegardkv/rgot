@@ -1,5 +1,4 @@
 from collections import namedtuple
-from enum import Enum
 
 __author__ = 'Vegard'
 
@@ -55,6 +54,11 @@ class Champion:
         self._w_scaling = champion_data['spells'][1].get('vars', [{}])
         self._e_scaling = champion_data['spells'][2].get('vars', [{}])
         self._r_scaling = champion_data['spells'][3].get('vars', [{}])
+
+        self._q_cooldown = champion_data['spells'][0]['cooldown']
+        self._w_cooldown = champion_data['spells'][1]['cooldown']
+        self._e_cooldown = champion_data['spells'][2]['cooldown']
+        self._r_cooldown = champion_data['spells'][3]['cooldown']
 
         self._q_damage_category = None
         self._w_damage_category = None
@@ -319,6 +323,10 @@ class Champion:
         return 0
 
     @property
+    def derived_cooldown_reduction(self):
+        return self.bonus_stats['rPercentCooldownMod'] + self.bonus_stats['rPercentCooldownModPerLevel'] * self.level
+
+    @property
     def items(self):
         return self.__items
 
@@ -411,3 +419,30 @@ class Champion:
         if damageset['pure'] > 0:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
+
+    def _calculate_spell_rotation_damage(self, order, skill_levels, target, tmax=10):
+        # TODO
+        pass
+        """
+        CAST_TIME = 0.25
+        cd = [0]*len(order)
+        cdr = self.derived_cooldown_reduction
+        event_queue = [[0.0, o] for o in order]
+
+        time_stamps = []
+        damages = []
+        t = 0
+        while t < tmax:
+            next_ability = event_queue.pop(0)
+            spell_name = next_ability[1]
+            if  spell_name == 'q':
+                next_time_available = (1-cdr) * self._q_cooldown[skill_levels[order.index[spell_name]]]
+                for i, e in enumerate(event_queue):
+                    if e[0] > next_time_available:
+                        event_queue.insert(i, [next_time_available, spell_name])
+            time_stamps.append(next_ability[0])
+            if next_ability[1] == 'q':
+        """
+
+
+
