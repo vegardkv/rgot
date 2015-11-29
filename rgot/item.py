@@ -1,14 +1,54 @@
 import rgot.database
 from rgot import champion as cp
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 __author__='knutanha'
 
+class Item:
+    def __init__(self, item_data):
+        """
+        :param item_data:
+        :return:
+        """
+        # Not sure if this should be private or not... Should at least implement as a property?
+        self.__item_data = item_data
 
-PassiveEffect = namedtuple('PassiveEffect', ['group', 'type', 'unit', 'amount',
-                                       'minion_cap', 'unique', 'unique_name'])
+    def __getitem__(self, item):
+        return self.__item_data[item]
 
-ActiveEffect = namedtuple('ActiveEffect',[])
+    def __contains__(self, item):
+        return item in self.__item_data
+
+    @property
+    def bonus_stats(self):
+        return self['stats']
+
+
+class ItemSet:
+    def __init__(self, items):
+        self.__items = items
+        self.__total_stats = defaultdict(float)
+
+    def __getitem__(self, item):
+        return self.__items[item]
+
+    @property
+    def bonus_stats(self):
+        if not self.__total_stats:
+            for item in self.__items:
+                for stat_name, stat_value in item.bonus_stats.items():
+                    self.__total_stats[stat_name] += stat_value
+        return self.__total_stats
+
+
+
+
+
+
+#PassiveEffect = namedtuple('PassiveEffect', ['group', 'type', 'unit', 'amount',
+                                       #'minion_cap', 'unique', 'unique_name'])
+
+#ActiveEffect = namedtuple('ActiveEffect',[])
 
 """
 class Item:
@@ -43,7 +83,7 @@ class Item:
                 amount=self.__item_info['effect']['Effect1Amount'], minion_cap=60,
                 unique=True, unique_name=None))
 """
-    """
+"""
     Passive Effects:
     group=['OnAutoAttack']
     type=['physicalDamage']
@@ -52,7 +92,7 @@ class Item:
     minion_cap = <flat_number>
     unique=[True,False]
     unique_name=[None, '<unique_effect_name>']
-    """
+"""
 
 
 """
@@ -62,7 +102,7 @@ class Item:
             ))
 """
 
-    """
+"""
     Passive Effects:
     group=['OnAutoAttack']
     type=['physicalDamage']
@@ -71,7 +111,7 @@ class Item:
     minion_cap = <flat_number>
     unique=[True,False]
     unique_name=[None, '<unique_effect_name>']
-    """
+"""
 
 
 

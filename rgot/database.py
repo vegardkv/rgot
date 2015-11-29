@@ -1,12 +1,15 @@
 import json
 import rgot.champion
+import rgot.item
 from rgot.implementations.lucian import Lucian
 
 __author__ = 'Vegard'
 
-class ItemBaseGenerator:
+class ItemFactory:
     def __init__(self, filename):
-        self.all_items = json.load(open(filename, 'r'))['data']
+        #self.all_items = json.load(open(filename, 'r'))['data']
+        all_items = json.load(open(filename, 'r'))['data']
+        self.all_items = dict((key, rgot.item.Item(info)) for key, info in all_items.items())
 
     def generate(self, or_tags=None):
         if or_tags is None:
@@ -37,6 +40,9 @@ class ItemBaseGenerator:
         elif index is not None:
             it = self.all_items[str(index)]
         return it
+
+    def get_itemset(self, names=None):
+        return rgot.item.ItemSet([self.get(n) for n in names])
 
 
 class ChampionGenerator:

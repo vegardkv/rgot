@@ -15,12 +15,12 @@ class TestOptimizer(unittest.TestCase):
         super().setUp()
         self.dummy_champion_info = json.load(open('../data/dummy_champion.json', 'r'))
         self.champion_database = rgot.database.ChampionGenerator('../data/all_champions.json')
-        self.item_base = rgot.database.ItemBaseGenerator('../data/all_items_parsed.json')
+        self.item_base = rgot.database.ItemFactory('../data/all_items_parsed.json')
 
     def test_brute_force_write_result(self):
         items = []
-        champion = rgot.champion.Champion(self.dummy_champion_info)
-        target_champion = rgot.champion.Champion(self.dummy_champion_info)
+        champion = self.champion_database.create_champion('Thresh')#rgot.champion.Champion(self.dummy_champion_info)
+        target_champion = self.champion_database.create_champion('Thresh')#rgot.champion.Champion(self.dummy_champion_info)
         result = rgot.optimizer.brute_force_for_itemsets(champion, target_champion, items, 'autoAttackDPS')
         result.sort_permanently(ascending=False)
         result.write_to_json_file('./out/test.json')

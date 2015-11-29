@@ -2,6 +2,30 @@
 class DummyItem:
     def __init__(self, item_data):
         """
+
+        :param item_data:
+        :return:
+        """
+        self.item_data = item_data
+
+    def __getitem__(self, item):
+        return self.item_data[item]
+
+
+class DummyItemSet:
+    def __init__(self, items):
+        self.items = items
+
+    def __getitem__(self, item):
+        return self.items[item]
+
+    @property
+    def bonus_stats(self):
+        pass
+
+
+
+"""
         item_data is presumably a json structure from all_items_parsed. e.g
         {
       "plaintext": "Overcomes enemies with high armor",
@@ -54,10 +78,4 @@ class DummyItem:
       },
       "sanitizedDescription": "+25 Attack Damage UNIQUE Passive - Last Whisper: +30% Bonus Armor Penetration."
     }
-        :param item_data:
-        :return:
-        """
-        self.item_data = item_data
-
-    def __getitem__(self, item):
-        return self.item_data[item]
+"""

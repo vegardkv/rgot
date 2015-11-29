@@ -1,11 +1,11 @@
 import unittest
-from rgot.database import ChampionGenerator, ItemBaseGenerator
+from rgot.database import ChampionGenerator, ItemFactory
 
 class TestLucian(unittest.TestCase):
     def setUp(self):
         super().setUp()
         self.champion_generator = ChampionGenerator('../../data/all_champions.json')
-        self.item_generator = ItemBaseGenerator('../../data/all_items_parsed.json')
+        self.item_generator = ItemFactory('../../data/all_items_parsed.json')
 
     def tearDown(self):
         super().tearDown()

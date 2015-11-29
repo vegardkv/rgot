@@ -22,7 +22,7 @@ class TestItemGeneretor(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
-        self.item_generator = rgot.database.ItemBaseGenerator('../data/all_items_parsed.json')
+        self.item_generator = rgot.database.ItemFactory('../data/all_items_parsed.json')
 
     def test_get_by_name(self):
         ie = self.item_generator.get(name='Infinity Edge')
