@@ -317,10 +317,36 @@ class Champion:
     def derived_bonus_armor(self):
         return self.bonus_stats["FlatArmorMod"] + self.bonus_stats["rFlatArmorModPerLevel"] * (self.level - 1)
 
+    # MAGIC RESIST
+    @property
+    def derived_magic_resist(self):
+        return (self.basestats["spellblock"] +
+                self.basestats["spellblockperlevel"] * (self.level - 1) +
+                self.bonus_stats["FlatSpellBlockMod"] +
+                self.bonus_stats["rFlatSpellBlockModPerLevel"] * (self.level - 1)
+                ) * (1.0 + self.bonus_stats["PercentSpellBlockMod"])
+
     # ABILITIES
+    # Ability Power
     @property
     def derived_ability_power(self):
         return 0
+
+    # Magic Penetration
+    #              "rFlatMagicPenetrationMod": 0.0,
+    #           "rFlatMagicPenetrationModPerLevel": 0.0,
+    #           "rPercentMagicPenetrationMod": 0.0,
+    #                  "rPercentMagicPenetrationModPerLevel": 0.0,
+    # TODO: Implement derived_percent_magic_penetration
+    @property
+    def derived_percent_magic_penetration(self):
+        return 0.0
+
+    # TODO: Implement derived_flat_magic_penetration
+    @property
+    def derived_flat_magic_penetration(self):
+        return 0.0
+
 
     @property
     def derived_cooldown_reduction(self):
@@ -415,7 +441,19 @@ class Champion:
             armor_multiplier = 100.0 / (target_armor_perceived + 100.0)
             physical_damage = damageset['physical'] * armor_multiplier
         if damageset['magic'] > 0:
-            magic_damage = damageset['magic']
+            # TODO: Implement magic resist reduction
+            # From wiki:
+            # 1. Magic reduction, flat. (can reduce mr < 0) (debuff on target)
+            # 2. Magic reduction, percentage. (only > 0) (debuff on target)
+            # 3. Magic penetration, percentage. (only > 0)
+            # 4. Magic penetration, flat. (only > 0)
+            target_MR_perceived = (target.derived_magic_resist *
+                                   (1.0 - self.derived_percent_magic_penetration) -
+                                   self.derived_flat_magic_penetration)
+            if target_MR_perceived < 0:
+                magic_damage = damageset['magic'] * (2 - 100.0/(100.0 - target_MR_perceived))
+            else:
+                magic_damage = damageset['magic'] * (1 - 100.0/(100.0 + target_MR_perceived))
         if damageset['pure'] > 0:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
@@ -443,6 +481,3 @@ class Champion:
             time_stamps.append(next_ability[0])
             if next_ability[1] == 'q':
         """
-
-
-
