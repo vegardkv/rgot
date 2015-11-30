@@ -458,26 +458,62 @@ class Champion:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
 
-    def _calculate_spell_rotation_damage(self, order, skill_levels, target, tmax=10):
-        # TODO
-        pass
-        """
+    def _calculate_spell_rotation_damage(self, order, skill_levels, target=None, tmax=10):
         CAST_TIME = 0.25
-        cd = [0]*len(order)
         cdr = self.derived_cooldown_reduction
-        event_queue = [[0.0, o] for o in order]
-
-        time_stamps = []
-        damages = []
+        q = [(0, val) for val in order]
         t = 0
-        while t < tmax:
-            next_ability = event_queue.pop(0)
-            spell_name = next_ability[1]
-            if  spell_name == 'q':
-                next_time_available = (1-cdr) * self._q_cooldown[skill_levels[order.index[spell_name]]]
-                for i, e in enumerate(event_queue):
-                    if e[0] > next_time_available:
-                        event_queue.insert(i, [next_time_available, spell_name])
-            time_stamps.append(next_ability[0])
-            if next_ability[1] == 'q':
-        """
+        out = []
+        while True:
+            et, skill = q.pop(0)
+            skill_index = order.index(skill)
+            t = max(t, et) + CAST_TIME
+            if t > tmax:
+                break
+            if skill == 'q':
+                damage_dealt = self.direct_damage_q(skill_levels[skill_index], target)
+                t_cd = self._q_cooldown[skill_levels[skill_index]] * (1 - cdr)
+            elif skill == 'w':
+                damage_dealt = self.direct_damage_w(skill_levels[skill_index], target)
+                t_cd = self._w_cooldown[skill_levels[skill_index]] * (1 - cdr)
+            elif skill == 'e':
+                damage_dealt = self.direct_damage_e(skill_levels[skill_index], target)
+                t_cd = self._e_cooldown[skill_levels[skill_index]] * (1 - cdr)
+            elif skill == 'r':
+                damage_dealt = self.direct_damage_r(skill_levels[skill_index], target)
+                t_cd = self._r_cooldown[skill_levels[skill_index]] * (1 - cdr)
+            else:
+                raise ValueError('Could not find skill named: %s' % skill)
+            out.append((t, skill, damage_dealt))
+            insert_location = [i[0] for i in q if i[0] > t + t_cd]
+            q.insert(insert_location or len(q), (t + t_cd, skill))
+        return out
+"""
+t = 0
+while t < tmax
+    et,skill = queue.pop()
+    t = max(last t, et)+ cast time
+    dmg.append(skill.damage)
+    tstamp.append(t)
+    insert(t,skill) into queue
+
+
+CAST_TIME = 0.25
+cd = [0]*len(order)
+cdr = self.derived_cooldown_reduction
+event_queue = [[0.0, o] for o in order]
+
+time_stamps = []
+damages = []
+t = 0
+while t < tmax:
+    next_ability = event_queue.pop(0)
+    spell_name = next_ability[1]
+    if  spell_name == 'q':
+        next_time_available = (1-cdr) * self._q_cooldown[skill_levels[order.index[spell_name]]]
+        for i, e in enumerate(event_queue):
+            if e[0] > next_time_available:
+                event_queue.insert(i, [next_time_available, spell_name])
+    time_stamps.append(next_ability[0])
+    if next_ability[1] == 'q':
+"""
