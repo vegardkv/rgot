@@ -73,13 +73,13 @@ class Champion:
     # provide the interface to the Champion-class (for readability).
     def direct_damage_q(self, skill_level=1, target=None):
         if self._q_damage_category == 'physical':
-            dmg = add_damage_sets(DamageSet(physical=self._q_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(physical=self._q_damage[skill_level-1]),
                                   self._calculate_scaled_damage('q', skill_level))
         elif self._q_damage_category == 'magic':
-            dmg = add_damage_sets(DamageSet(magic=self._q_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(magic=self._q_damage[skill_level-1]),
                                   self._calculate_scaled_damage('q', skill_level))
         elif self._q_damage_category == 'pure':
-            dmg = add_damage_sets(DamageSet(pure=self._q_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(pure=self._q_damage[skill_level-1]),
                                   self._calculate_scaled_damage('q', skill_level))
         else:
             raise AttributeError('Damage Category not defined for Q for champion %s' % self.name)
@@ -90,13 +90,13 @@ class Champion:
 
     def direct_damage_w(self, skill_level=1, target=None):
         if self._w_damage_category == 'physical':
-            dmg = add_damage_sets(DamageSet(physical=self._w_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(physical=self._w_damage[skill_level-1]),
                                   self._calculate_scaled_damage('w', skill_level))
         elif self._w_damage_category == 'magic':
-            dmg = add_damage_sets(DamageSet(magic=self._w_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(magic=self._w_damage[skill_level-1]),
                                   self._calculate_scaled_damage('w', skill_level))
         elif self._w_damage_category == 'pure':
-            dmg = add_damage_sets(DamageSet(pure=self._w_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(pure=self._w_damage[skill_level-1]),
                                   self._calculate_scaled_damage('w', skill_level))
         else:
             raise AttributeError('Damage Category not defined for W for champion %s' % self.name)
@@ -108,13 +108,13 @@ class Champion:
 
     def direct_damage_e(self, skill_level=1, target=None):
         if self._w_damage_category == 'physical':
-            dmg = add_damage_sets(DamageSet(physical=self._e_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(physical=self._e_damage[skill_level-1]),
                                   self._calculate_scaled_damage('e', skill_level))
         elif self._w_damage_category == 'magic':
-            dmg = add_damage_sets(DamageSet(magic=self._e_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(magic=self._e_damage[skill_level-1]),
                                   self._calculate_scaled_damage('e', skill_level))
         elif self._w_damage_category == 'pure':
-            dmg = add_damage_sets(DamageSet(pure=self._e_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(pure=self._e_damage[skill_level-1]),
                                   self._calculate_scaled_damage('e', skill_level))
         else:
             raise AttributeError('Damage Category not defined for E for champion %s' % self.name)
@@ -125,13 +125,13 @@ class Champion:
 
     def direct_damage_r(self, skill_level=1, target=None):
         if self._r_damage_category == 'physical':
-            dmg = add_damage_sets(DamageSet(physical=self._r_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(physical=self._r_damage[skill_level-1]),
                                   self._calculate_scaled_damage('r', skill_level))
         elif self._r_damage_category == 'magic':
-            dmg = add_damage_sets(DamageSet(magic=self._r_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(magic=self._r_damage[skill_level-1]),
                                   self._calculate_scaled_damage('r', skill_level))
         elif self._r_damage_category == 'pure':
-            dmg = add_damage_sets(DamageSet(pure=self._r_damage[skill_level]),
+            dmg = add_damage_sets(DamageSet(pure=self._r_damage[skill_level-1]),
                                   self._calculate_scaled_damage('r', skill_level))
         else:
             raise AttributeError('Damage Category not defined for R for champion %s' % self.name)
@@ -458,7 +458,7 @@ class Champion:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
 
-    def _calculate_spell_rotation_damage(self, order, skill_levels, target=None, tmax=10):
+    def calculate_spell_rotation_damage(self, order, skill_levels, target=None, tmax=10):
         CAST_TIME = 0.25
         cdr = self.derived_cooldown_reduction
         q = [(0, val) for val in order]
@@ -472,21 +472,21 @@ class Champion:
                 break
             if skill == 'q':
                 damage_dealt = self.direct_damage_q(skill_levels[skill_index], target)
-                t_cd = self._q_cooldown[skill_levels[skill_index]] * (1 - cdr)
+                t_cd = self._q_cooldown[skill_levels[skill_index]-1] * (1 - cdr)
             elif skill == 'w':
                 damage_dealt = self.direct_damage_w(skill_levels[skill_index], target)
-                t_cd = self._w_cooldown[skill_levels[skill_index]] * (1 - cdr)
+                t_cd = self._w_cooldown[skill_levels[skill_index]-1] * (1 - cdr)
             elif skill == 'e':
                 damage_dealt = self.direct_damage_e(skill_levels[skill_index], target)
-                t_cd = self._e_cooldown[skill_levels[skill_index]] * (1 - cdr)
+                t_cd = self._e_cooldown[skill_levels[skill_index]-1] * (1 - cdr)
             elif skill == 'r':
                 damage_dealt = self.direct_damage_r(skill_levels[skill_index], target)
-                t_cd = self._r_cooldown[skill_levels[skill_index]] * (1 - cdr)
+                t_cd = self._r_cooldown[skill_levels[skill_index]-1] * (1 - cdr)
             else:
                 raise ValueError('Could not find skill named: %s' % skill)
             out.append((t, skill, damage_dealt))
-            insert_location = [i[0] for i in q if i[0] > t + t_cd]
-            q.insert(insert_location or len(q), (t + t_cd, skill))
+            insert_location = ([key for key, val in enumerate(q) if val[0] > t + t_cd] or [len(q)])[0]
+            q.insert(insert_location, (t + t_cd, skill))
         return out
 """
 t = 0
