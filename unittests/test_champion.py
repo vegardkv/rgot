@@ -24,5 +24,5 @@ class TestChampion(unittest.TestCase):
 
     def test_spell_rotation(self):
         lucian = self.champion_generator.create_champion('Lucian')
-        rotation = lucian.calculate_spell_rotation_damage(['q', 'e', 'w'], [5,1,5])
+        rotation = lucian.calculate_continuous_rotation(['q', 'e', 'w'], [5, 1, 5])
         self.assertGreater(len(rotation), 0)

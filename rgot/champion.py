@@ -458,7 +458,7 @@ class Champion:
             pure_damage = damageset['pure']
         return DamageSet(physical=physical_damage, magic=magic_damage, pure=pure_damage)
 
-    def calculate_spell_rotation_damage(self, order, skill_levels, target=None, tmax=10):
+    def calculate_continuous_rotation(self, order, skill_levels, target=None, tmax=10):
         CAST_TIME = 0.25
         cdr = self.derived_cooldown_reduction
         q = [(0, val) for val in order]
@@ -483,11 +483,32 @@ class Champion:
                 damage_dealt = self.direct_damage_r(skill_levels[skill_index], target)
                 t_cd = self._r_cooldown[skill_levels[skill_index]-1] * (1 - cdr)
             else:
-                raise ValueError('Could not find skill named: %s' % skill)
+                raise ValueError('Could not find spell named: %s' % skill)
             out.append((t, skill, damage_dealt))
             insert_location = ([key for key, val in enumerate(q) if val[0] > t + t_cd] or [len(q)])[0]
             q.insert(insert_location, (t + t_cd, skill))
         return out
+
+    def calculate_rotation(self, rotation, skill_levels, target=None):
+        tot = DamageSet()
+        for spell in rotation:
+            if spell=='q':
+                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['q'], target))
+            elif spell=='w':
+                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['w'], target))
+            elif spell=='e':
+                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['e'], target))
+            elif spell=='r':
+                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['r'], target))
+            elif spell=='aa':
+                #TODO: implement aa damage
+                pass
+            else:
+                raise ValueError('Could not find spell named: %s' % spell)
+        return tot
+
+
+
 """
 t = 0
 while t < tmax
