@@ -33,3 +33,13 @@ class TestOptimizer(unittest.TestCase):
         result = rgot.optimizer.brute_force_for_itemsets(lucian, lucian, item_base, 'autoAttackDPS', my_filters)
         result.sort_permanently(ascending=False)
         result.write_to_csv_file('./out/test.csv')
+
+    def test_spell_rotation_brute_force(self):
+        lucian = self.champion_database.create_champion('Lucian')
+        lucian.level = 1
+        item_base = self.item_base.generate(['CriticalStrike', 'Damage', 'AttackSpeed', 'ArmorPenetration'])
+        my_filters = {'maxNumberOfItems' : 1}
+        result = rgot.optimizer.brute_force_for_itemsets(lucian, lucian, item_base, 'spellRotation', my_filters,
+                                                         rotation=['q', 'aa', 'w', 'aa'], skillLevels=dict(q=3, w=1))
+        result.sort_permanently(ascending=False)
+        result.write_to_csv_file('./out/test.csv')

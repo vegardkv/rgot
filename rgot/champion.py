@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 __author__ = 'Vegard'
 
@@ -160,8 +160,10 @@ class Champion:
             # unique_items = []
 
             # Matches item stat properties from "../data/all_items.json"
-            # TODO: Ikke fyll inn alle keys, la bonus_stats returnere 0.0 dersom taggen ikke fins
-            temp_bonus_stats = {
+            # TODO: Keep this list of stats somewhere. When using defaultdict, it is not necessary to initialize with 0.
+            # The list is however useful as a lookup-table.
+            self.__bonus_stats = defaultdict(float)
+            self.__bonus_stats.update({
                 # AD STATS
                 # Attack Damage
                 "rFlatPhysicalDamageModPerLevel": 0.0,
@@ -259,18 +261,15 @@ class Champion:
                 "rFlatTimeDeadModPerLevel": 0.0,
                 "rPercentTimeDeadMod": 0.0,
                 "rPercentTimeDeadModPerLevel": 0.0,
-            }
+            })
 
             # Collecting stats from items
-            # TODO: en UNIQUE handler (må tagges på en eller annen måte)
             for item in self.__items:
                 for key, value in item["stats"].items():
                     if key == "rPercentArmorPenetrationMod" or key == "FlatCritDamageMod":
-                        temp_bonus_stats[key] = max(value, temp_bonus_stats[key])
+                        self.__bonus_stats[key] = max(value, self.__bonus_stats[key])
                     else:
-                        temp_bonus_stats[key] += value
-            self.__bonus_stats = temp_bonus_stats
-
+                        self.__bonus_stats[key] += value
         return self.__bonus_stats
 
     # Common calculations has the "derived"-tag
@@ -361,6 +360,14 @@ class Champion:
         self.__items = itemset
         self.__bonus_stats = []
 
+    def calculate_autoattack_damage(self, target=None):
+        if target is None:
+            return DamageSet(physical=self.derived_base_attack_damage + self.derived_bonus_attack_damage)
+        else:
+            return self._calculate_resisted_damage(
+            DamageSet(physical=self.derived_base_attack_damage + self.derived_bonus_attack_damage), target)
+
+
     def calculate_autoattack_dps(self, target=None):
         """
         Calculates Champion auto attack damage per second.
@@ -431,8 +438,10 @@ class Champion:
         return DamageSet(physical=ph, magic=ma, pure=pu)
 
     def _calculate_resisted_damage(self, damageset, target):
+        if target is None:
+            raise ValueError('target cannot be None.')
         physical_damage, magic_damage, pure_damage = 0, 0, 0
-        if damageset['physical'] > 0:
+        if damageset.physical > 0:
             target_armor_perceived = (target.derived_base_armor +
                                       (target.derived_bonus_armor *
                                        (1.0 - self.bonus_stats["rPercentArmorPenetrationMod"])) -
@@ -495,14 +504,14 @@ class Champion:
             if spell=='q':
                 tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['q'], target))
             elif spell=='w':
-                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['w'], target))
+                tot = add_damage_sets(tot, self.direct_damage_w(skill_levels['w'], target))
             elif spell=='e':
-                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['e'], target))
+                tot = add_damage_sets(tot, self.direct_damage_w(skill_levels['e'], target))
             elif spell=='r':
-                tot = add_damage_sets(tot, self.direct_damage_q(skill_levels['r'], target))
+                tot = add_damage_sets(tot, self.direct_damage_r(skill_levels['r'], target))
             elif spell=='aa':
                 #TODO: implement aa damage
-                pass
+                tot = add_damage_sets(tot, self.calculate_autoattack_damage(target))
             else:
                 raise ValueError('Could not find spell named: %s' % spell)
         return tot

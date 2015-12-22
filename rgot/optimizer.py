@@ -6,7 +6,7 @@ __author__ = 'Vegard'
 
 MAX_ITEMS = 6
 
-def brute_force_for_itemsets(friendlychampion, enemychampion, itembase, analysis, filters=None):
+def brute_force_for_itemsets(friendlychampion, enemychampion, itembase, analysis, filters=None, **kwargs):
     """
     Iterates all combinations of items in itembase.
     :param friendlychampion: Champion-instance of self
@@ -33,6 +33,11 @@ def brute_force_for_itemsets(friendlychampion, enemychampion, itembase, analysis
                 if analysis == 'autoAttackDPS':
                     output.results.append(friendlychampion.calculate_autoattack_dps(target=enemychampion))
                     output.itemsets.append(item_tuple)
+                elif analysis == 'spellRotation' and 'rotation' in kwargs and 'skillLevels' in kwargs:
+                    output.results.append(friendlychampion.calculate_rotation(kwargs['rotation'], kwargs['skillLevels']))
+                    output.itemsets.append(item_tuple)
+                else:
+                    raise NotImplementedError('Analysis named %s not implemented' % analysis)
             if not counter % 100:
                 print(counter)
             counter += 1
